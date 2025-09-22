@@ -1,19 +1,18 @@
-# Project Title (Update)
-
-Add a description of your project here.
+# Terminal Command Line Budget Statistics App
+The main idea is 
 
 
 ## Instructions for Build and Use
 
 Steps to build and/or run the software:
 
-1. First step here
-2.
+1. Ensure C++ is installed
+2. Ensure Cmake is installed
 3.
 
 Instructions for using the software:
 
-1. First step here
+1. Build and Run TerminalBudgetr.cpp
 2.
 3.
 
@@ -21,7 +20,7 @@ Instructions for using the software:
 
 To recreate the development environment, you need the following software and/or libraries with the specified versions:
 
-* First thing here
+* Download Visual Studio 2022
 *
 *
 
@@ -29,7 +28,7 @@ To recreate the development environment, you need the following software and/or 
 
 I found these websites useful in developing this software:
 
-* [Website Title](Link)
+* [Youtube: The only CMake tutorial you will ever need (easy CMake setup tutorial)](https://www.youtube.com/watch?v=A735Y4kMIPM)
 *
 *
 
@@ -37,6 +36,6 @@ I found these websites useful in developing this software:
 
 The following items I plan to fix, improve, and/or add to this project in the future:
 
-* [ ] First thing here
+* [ ] 
 * [ ]
 * [ ]
