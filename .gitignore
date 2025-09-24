@@ -4,6 +4,7 @@ build/
 /.vs
 .idea/
 CmakeSettings.json
+sprint_time_log.md
 
 CMakeLists.txt.user
 CMakeCache.txt
@@ -17,4 +18,3 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
-
