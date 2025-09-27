@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+//#include <cctype> // use for std::tolower
 #include "budget.h"
 // TODO: Reference additional headers your program requires here.
 

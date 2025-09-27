@@ -1,25 +1,33 @@
 #include "category.h"
 using namespace std;
 
-Category::Category(string name, double max): name(name), max(max)
+Category::Category(string name, long double max) : name(name), max(max)
 {
-
+	current = 0.0L;
 }
 
-void Category::SetMax(double max)
+void Category::SetMax(long double max)
 {
 	this->max = max;
 }
 
 string Category::Summary()
 {
-	double current = CurrentSpending();
-	string summary = name + string(": ") + to_string(CurrentSpending()) + string(" / ") + to_string(max);
-	//string summary = std::vformat("{}: {.:2f} / {.:2f}", std::make_format_args(name, current, max)); // prints out a summary (BUGGED)
-	return summary;
+	ostringstream ss; // a stream to put formatted text into
+	ss << fixed << setprecision(2); // format the stream
+	// use < << setfill('_') > to pad next item with a custom character
+
+	ss << "|" << setw(24) << name << ": $" << setw(10) << CurrentSpending() << " / $" << setw(10) << max; // In USD, by default
+	
+	return ss.str(); // return the stream as a string
 }
 
-double Category::CurrentSpending()
+void Category::AddTransaction(long double amount)
 {
-	return 0.0;
+	current += amount;
+}
+
+long double Category::CurrentSpending()
+{
+	return current;
 }
