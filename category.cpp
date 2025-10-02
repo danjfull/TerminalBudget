@@ -1,6 +1,19 @@
 #include "category.h"
 using namespace std;
 
+Category::Category() : name("_NOT_SET_"), max(0.00L), current(0.0L)
+{
+	
+}
+
+Category::Category(const Category& other)
+{
+	// This is the copy contructor
+	this->name = other.name;
+	this->max = other.max;
+	this->current = other.current;
+}
+
 Category::Category(string name, long double max) : name(name), max(max)
 {
 	current = 0.0L;
@@ -30,4 +43,9 @@ void Category::AddTransaction(long double amount)
 long double Category::CurrentSpending()
 {
 	return current;
+}
+
+string Category::SaveCsv()
+{
+	return name + "," + to_string(current) + "," + to_string(max);
 }

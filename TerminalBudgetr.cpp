@@ -18,17 +18,18 @@ int main()
 	// start with app info:
 	string command = "about"; // show starting information
 	cout << budget.Command(command) << endl;
-	cout << "Enter a transaction (or 'exit'):" << endl;
+	cout << "Enter a transaction (or 'exit'):" << endl << ">";
 	getline(cin, command); // get first command
-	while (command != "exit") // search for the word 'exit' in the string
+	while (command != "exit" && command != "quit") // allow the user to quit
 	{
 		string response = budget.Command(command); // respond to command
 		if (response != string(""))
 		{
-			cout << response << endl;
+			cout << response << endl << endl << ">";
 		}
 		getline(cin, command); // get a new command, full line
 	}
+	budget.Save(); // save the budget categories
 	cout << "logout" << endl;
 	return 0;
 }

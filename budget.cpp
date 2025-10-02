@@ -2,68 +2,89 @@
 #include <iostream>
 using namespace std;
 
-Budget::Budget(): categoryName(""), lastValue(0.0L), lastSign(1), status(CategoryStatus::done)
+Budget::Budget(): _status(CategoryStatus::done)
 {
-
+	_last = transaction{ "", 0.0L, 1};
+	if (filesystem::exists("budget.csv")) // load the buduget categories if they exist
+	{
+		Load();
+	}
 }
 
-Category Budget::AddCategory(string name, double monthlyMax)
+void Budget::AddCategory(string name, double monthlyMax)
 {
-	categories.emplace_back(name, monthlyMax); // create a category in the categories list
-	return categories.back();
+	_categories.emplace_back(name, monthlyMax); // create a category in the categories list
 }
 
 void Budget::PrintCategorySummaries()
 {
-	for (auto& cat : categories) // for every cat in categories
+	for (auto& cat : _categories) // for every cat in categories
 	{
 		cout << cat.Summary() << endl;
 	}
+}
+
+long double Budget::ParseLongD(string num)
+{
+	long double newValue = 0.00L;
+	string reply = "";
+	try {
+		newValue = stold(num); // convert to long double
+	}
+	catch (const invalid_argument& e) {
+		reply += " ERROR invalid argument- " + string(e.what());
+		newValue = 0.00L;
+	}
+	catch (const out_of_range& e) {
+		reply += " ERROR argument out of range- " + string(e.what());
+		newValue = 0.00L;
+	}
+	return newValue;
 }
 
 string Budget::PromptCategoryDetails(string command)
 {
 	string reply = "";
 	// check to see if they wanted to make a new category
-	if (status == CategoryStatus::initiate) //
+	if (_status == CategoryStatus::initiate) //
 	{
 		if (command == "y" || command == "Y" || command == "yes")
 		{
-			if (lastSign == -1)
+			if (_last.sign == -1)
 			{
 				// Then this is income, not expense
-				Category cat = AddCategory(categoryName, 0.0L); // set the max to 0.0
-				cat.AddTransaction(lastValue);
-				reply += "\nCreated new: \n" + cat.Summary();
-				status = CategoryStatus::done;
+				AddCategory(_last.category, 0.0L); // set the max to 0.0
+				_categories.back().AddTransaction(_last.value);
+				reply += "\nCreated new: \n" + _categories.back().Summary();
+				_status = CategoryStatus::done;
 			}
 			else
 			{
 				// define a monthly max for this expense
-				reply = "Define monthly maximum for: " + categoryName;
-				status = CategoryStatus::max;
+				reply = "Define monthly maximum for: " + _last.category;
+				_status = CategoryStatus::max;
 			}
 		}
 		else
 		{
 			// cancel the transaction and don't make a new category for it.
-			status = CategoryStatus::done; // they don't want to make a category
-			reply = " transaction cancelled";
+			_status = CategoryStatus::done; // they don't want to make a category
+			reply = "Transaction cancelled";
 		}
 	}
-	else if (status == CategoryStatus::max)
+	else if (_status == CategoryStatus::max)
 	{
 		long double max = ParseMoney(command, reply);
 		if (reply.find("ERROR") == string::npos)
 		{
-			Category cat = AddCategory(categoryName, max);
-			cat.AddTransaction(lastValue);
-			reply += "\nCreated new: \n" + cat.Summary();
-			status = CategoryStatus::done;
+			AddCategory(_last.category, max);
+			_categories.back().AddTransaction(_last.value);
+			reply += "-Created new: \n" + _categories.back().Summary();
+			_status = CategoryStatus::done;
 		}
 		else
 		{
-			reply += "\n--> Invalid value! Try again.";
+			reply += "--> Invalid value! Try again.";
 		}
 	}
 	return reply;
@@ -86,20 +107,51 @@ long double Budget::ParseMoney(string word, string& reply)
 	}
 
 	// try to get a number from it
-	long double newValue = 0.00L;
-	try {
-		newValue = stold(word); // convert to long double
-	}
-	catch (const invalid_argument& e) {
-		reply += " ERROR invalid argument- " + string(e.what());
-		newValue = 0.00L;
-	}
-	catch (const out_of_range& e) {
-		reply += " ERROR argument out of range- " + string(e.what());
-		newValue = 0.00L;
-	}
+	long double newValue = ParseLongD(word);
 	
 	return newValue * multiplier;
+}
+
+void Budget::Save()
+{
+	// save budget category info
+	ofstream categ("budget.csv");
+	for (auto& cat : _categories)
+	{
+		categ << cat.SaveCsv() + "\n";
+	}
+	categ.close();
+
+	// save transactions?
+}
+
+void Budget::Load()
+{
+	ifstream categ("budget.csv");
+	string line;
+	while (getline(categ, line))
+	{
+		// parse line into words
+		stringstream ss(line);
+		string word; // where to store the parsed word
+		vector<string> line;
+		while (getline(ss, word, ',')) // split line element by element
+		{
+			line.push_back(word);
+		}
+
+		// Get category details
+		string name = line[0];
+		long double spent = ParseLongD(line[1]);
+		long double max = ParseLongD(line[2]);
+
+		// create the category
+		Category c(name, max);
+		c.AddTransaction(spent);
+		_categories.push_back(c);
+	}
+
+	categ.close();
 }
 
 string Budget::Command(string command)
@@ -111,7 +163,7 @@ string Budget::Command(string command)
 		string reply = ""; // string to send information back out
 		// do logic on this string
 		
-		if (status != CategoryStatus::done)
+		if (_status != CategoryStatus::done)
 		{
 			return PromptCategoryDetails(command); // check for category creation
 		}
@@ -128,7 +180,7 @@ string Budget::Command(string command)
 		string word;
 		while (ss >> word) // go through each word in the string
 		{
-			reply += " analyzing '" + word + "',";
+			//reply += " analyzing '" + word + "',";
 			// see if it is a number
 			bool hasdigit = false;
 			for (char l : word)
@@ -138,7 +190,6 @@ string Budget::Command(string command)
 					hasdigit = true;
 				}
 			}
-
 
 			if (word == "spent")
 			{
@@ -186,19 +237,20 @@ string Budget::Command(string command)
 				reply += " detected category starting,";
 				category_start = true;
 			}
-			else if (word == "summary")
+			else if (word == "summary" || word == "status" || word == "list" || word == "ls")
 			{
 				PrintCategorySummaries(); // print summaries
-				return string(" printing summaries:");
+				return "";
 			}
-			else if (word == "help" || word == "--list") // if they say help, give a help menu of information
+			else if (word == "help") // if they say help, give a help menu of information
 			{
-				return string("type 'exit' to logout and close this program.\n\
-Or, type a dollar amount and its spending/earning category name (dollar signs '$' not required).\
-\n Use the word 'earned' or 'income' to denote a category in which money is gained.\
-\n You may use the word 'cents' to describe an amount. \
-\n Use 'k' at the end of a number to state that it is multiplied by 1000.\
-\n You may use negative numbers in a transaction (for example, to denote a refund).");
+				return string("-Type 'exit' to logout and close this program.\
+\n -Or type 'summary', 'status', 'list', or 'ls' to see the current budget category statuses.\
+\n -Or, type a dollar amount and its spending/earning category name (dollar signs '$' not required).\
+\n  Use the word 'earned' or 'income' to denote a category in which money is gained.\
+\n  You may use the word 'cents' to describe an amount. \
+\n  Use 'k' at the end of a number to state that it is multiplied by 1000.\
+\n  You may use negative numbers in a transaction (for example, to denote a refund).");
 			}
 			else if (word == "about")
 			{
@@ -217,7 +269,7 @@ Or, type a dollar amount and its spending/earning category name (dollar signs '$
 
 		// now add to the category with this new value
 		bool found = false;
-		for (auto& cat : categories)
+		for (auto& cat : _categories)
 		{
 			if (cat.Name() == category)
 			{
@@ -230,37 +282,14 @@ Or, type a dollar amount and its spending/earning category name (dollar signs '$
 		}
 		if (!found)
 		{
-			reply += "\n Category not yet defined: '" + category + "'. Make new (y/n)?";
-			status = CategoryStatus::initiate;
+			reply += "Category not yet defined: '" + category + "'. Make new (y/n)?";
+			_status = CategoryStatus::initiate;
 		}
 		// keep track of this new transaction's details
-		lastSign = sign;
-		categoryName = category;
-		lastValue = value;
+		_last.category = category;
+		_last.value = value;
+		_last.sign = sign;
 		return reply;
-
-		/*// search for the category
-		size_t found = command.find("groceries");
-		if (found != string::npos)
-		{
-			for (auto& cat : categories)
-			{
-				if (cat.Name() == "groceries")
-				{
-					cat.AddTransaction(10.00L); // add a transaction to this category
-				}
-			}
-			return string("Added $10 to category 'groceries'");
-		}
-		else // see if they want a printed summary
-		{
-			found = command.find("summary");
-			if (found != string::npos)
-			{
-				PrintCategorySummaries(); // print summaries
-			}
-		}
-		*/
 	}
 	else return string("");
 }

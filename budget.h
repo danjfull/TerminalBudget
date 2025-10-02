@@ -2,29 +2,39 @@
 #include "category.h"
 #include <vector>
 #include <string>
+#include <fstream>
+#include <filesystem>
 using namespace std;
 
 class Budget {
 public:
 	Budget();
 	// Adds a new category to this budget. Returns this new category.
-	Category AddCategory(string name, double monthlyMax);
+	void AddCategory(string name, double monthlyMax);
 	void PrintCategorySummaries();
 	string Command(string command);
 	string PromptCategoryDetails(string command);
 	long double ParseMoney(string word, string& reply);
+	void Save();
 private:
-	vector<Category> categories;
-	// stores the category name from the last transaction
-	string categoryName;
-	// stores the value from the last transaction
-	long double lastValue;
-	// stores if the last transaction was earning or spending
-	int lastSign;
-	enum CategoryStatus {
-		initiate,
-		max,
-		done
+	vector<Category> _categories;
+	
+	struct transaction {
+		string category;
+		long double value;
+		int sign;
 	};
-	CategoryStatus status;
+	// stores the last transaction
+	transaction _last;
+
+	enum CategoryStatus {
+		initiate, // parse the confirmation of making a new category
+		max, // parse the monthly maximum
+		done // not making a category
+	};
+	// Current status of making a new category
+	CategoryStatus _status;
+	void Load();
+	// return 0.0L if fails to parse
+	long double ParseLongD(string num);
 };
