@@ -1,4 +1,4 @@
-# Command-Line Budget Statistics App
+# Command-Line Budget App
 The main idea of this software is to reduce the amount of menus that users have to navigate through to enter a transaction in a typical budgeting software app. 
 This is done by enabling the user to enter a transaction into the budget software by typing one english-like line that describes the entire transaction.
 The software then categorizes it and tracks the budget.
