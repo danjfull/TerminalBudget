@@ -39,7 +39,7 @@ To recreate the development environment, you need the following software and/or 
 
 * Download Visual Studio 2022
 * Download C++ 20
-* Tools for Cmake (donloaded using Visual Studio Installer)
+* Tools for Cmake (downloaded using Visual Studio Installer)
 
 ## Useful Websites to Learn More
 

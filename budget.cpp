@@ -231,7 +231,7 @@ string Budget::Command(string command)
 					//category_start = false; // don't allow a new category name to start
 				}
 			}
-			else if (word == "at" || word == "in" || word == "on")
+			else if (word == "at" || word == "in" || word == "on" || word == "for")
 			{
 				// then this might be the start of a category name
 				reply += " detected category starting,";
