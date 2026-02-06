@@ -1,5 +1,8 @@
 #include "budget.h"
 #include <iostream>
+#include <string>
+#include <numeric>
+#include <ranges>
 using namespace std;
 
 Budget::Budget(): _status(CategoryStatus::done)
@@ -16,12 +19,23 @@ void Budget::AddCategory(string name, double monthlyMax)
 	_categories.emplace_back(name, monthlyMax); // create a category in the categories list
 }
 
-void Budget::PrintCategorySummaries()
+string Budget::GetCategorySummaries()
 {
-	for (auto& cat : _categories) // for every cat in categories
-	{
-		cout << cat.Summary() << endl;
-	}
+    // accumulate the summary into a single string, which is returned.
+    // summaries is a "lazy view" which knows how to produce, but isn't holding anything itself
+    auto summaries = _categories | views::transform([](const Category& c) {
+        return c.Summary();
+    });
+
+    string summary;
+    bool first = true;
+    for (auto&& s: summaries){
+        if(!first) summary += "\n"; // put new line between the summaries
+        first = false;
+        summary += s;
+    }
+
+    return summary;
 }
 
 long double Budget::ParseLongD(string num)
@@ -239,8 +253,7 @@ string Budget::Command(string command)
 			}
 			else if (word == "summary" || word == "status" || word == "list" || word == "ls")
 			{
-				PrintCategorySummaries(); // print summaries
-				return "";
+				return GetCategorySummaries(); // return the category summaries
 			}
 			else if (word == "help") // if they say help, give a help menu of information
 			{

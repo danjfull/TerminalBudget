@@ -13,8 +13,8 @@ public:
 	Category(const Category& other);
 	Category(string name, long double max);
 	void SetMax(long double max);
-	string Summary();
-	long double CurrentSpending();
+	string Summary() const;
+	long double CurrentSpending() const;
 	void AddTransaction(long double amount);
 	string Name() { return name; };
 	// return a csv string of this category information

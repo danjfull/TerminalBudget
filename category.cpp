@@ -24,7 +24,7 @@ void Category::SetMax(long double max)
 	this->max = max;
 }
 
-string Category::Summary()
+string Category::Summary() const
 {
 	ostringstream ss; // a stream to put formatted text into
 	ss << fixed << setprecision(2); // format the stream
@@ -40,7 +40,7 @@ void Category::AddTransaction(long double amount)
 	current += amount;
 }
 
-long double Category::CurrentSpending()
+long double Category::CurrentSpending() const
 {
 	return current;
 }

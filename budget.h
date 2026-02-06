@@ -11,7 +11,7 @@ public:
 	Budget();
 	// Adds a new category to this budget. Returns this new category.
 	void AddCategory(string name, double monthlyMax);
-	void PrintCategorySummaries();
+	string GetCategorySummaries();
 	string Command(string command);
 	string PromptCategoryDetails(string command);
 	long double ParseMoney(string word, string& reply);
